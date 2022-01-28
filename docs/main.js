@@ -2,6 +2,7 @@ let c = document.getElementById("Canvas");
 let ctx = c.getContext("2d");
 
 let disp_otb = false
+
 const toggle_otb =()=>{
 	disp_otb = (disp_otb+1)%2
 }
@@ -55,7 +56,7 @@ const generateFitnessWheel =()=>{
 		temp_best_fitness = Math.max(temp_best_fitness, fitness[i])
 		//console.log(fitness_wheel_borders[i])
 	}
-	console.log(best_fitness_GENs)
+	console.log("best GENCODE: " + best_fitness_GENs)
 	//console.log("size: " + wheel_size)
 }
 
@@ -205,3 +206,9 @@ const loop =()=>{
 	ctx.fillRect(cube_position[b_count-1].x-5, cube_position[b_count-1].y-5, 10, 10)
 }
 loop()
+
+window.onload=()=>{
+	document.querySelector('button').addEventListener('click',()=>{
+		toggle_otb()
+	})
+}
