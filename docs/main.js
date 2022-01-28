@@ -210,5 +210,6 @@ loop()
 window.onload=()=>{
 	document.querySelector('button').addEventListener('click',()=>{
 		toggle_otb()
+		console.log("clicked")
 	})
 }
