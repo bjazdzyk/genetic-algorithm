@@ -1,6 +1,11 @@
 let c = document.getElementById("Canvas");
 let ctx = c.getContext("2d");
 
+let disp_otb = false
+const toggle_otb =()=>{
+	disp_otb = (disp_otb+1)%2
+}
+
 let b_count = 5000
 let states = 8
 let decisions = 4
@@ -111,6 +116,9 @@ let generation_count = 10000
 const simulateGeneration =()=>{
 	simulated_generations++
 
+	const element = document.getElementById("g");
+	element.innerHTML = "Generation: "+simulated_generations;
+
 	apple_position = {x:Math.floor(Math.random()*500)+250, y:Math.floor(Math.random()*500)}
 
 	cube_position = []
@@ -176,17 +184,18 @@ const simulateGeneration =()=>{
 			}
 			
 		}
-	}, 20);
+	}, 15);
 }
 simulateGeneration()
 const loop =()=>{
 	requestAnimationFrame(loop)
 	ctx.fillStyle = "skyblue"
 	ctx.fillRect(0, 0, 1000, 500)
-
-	for(let i=0; i<b_count; i++){
-		ctx.fillStyle = "green"
-		ctx.fillRect(cube_position[i].x-5, cube_position[i].y-5, 10, 10)
+	if(!disp_otb){
+		for(let i=0; i<b_count; i++){
+			ctx.fillStyle = "green"
+			ctx.fillRect(cube_position[i].x-5, cube_position[i].y-5, 10, 10)
+		}
 	}
 
 	ctx.fillStyle = "red"
