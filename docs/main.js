@@ -7,7 +7,7 @@ const toggle_otb =()=>{
 	disp_otb = (disp_otb+1)%2
 }
 
-let b_count = 5000
+let b_count = 2000
 let states = 8
 let decisions = 4
 
