@@ -34,26 +34,24 @@ const countFitness =()=>{
 
 let fitness_wheel_borders = []
 let wheel_size = 0
+
+let best_fitness
 let best_fitness_GENs
-let prev_best_fitness_GENs
-let best_fitness = -100000000
-let temp_best_fitness
+
 const generateFitnessWheel =()=>{
-	temp_best_fitness = -100000000
 	countFitness()
+	best_fitness = -1000000
 	for(let i=0; i<b_count; i++){
 		if(fitness[i]>100){
-			fitness_wheel_borders[i] = wheel_size + fitness[i]*fitness[i]*fitness[i]*fitness[i]
-			wheel_size += fitness[i]*fitness[i]*fitness[i]*fitness[i]
+			fitness_wheel_borders[i] = wheel_size + fitness[i]*fitness[i]
+			wheel_size += fitness[i]*fitness[i]
 		}else{
 			fitness_wheel_borders[i] = wheel_size
 		}
-		if(fitness[i] >= best_fitness-10){
-			prev_best_fitness_GENs = best_fitness_GENs
+		if(fitness[i] > best_fitness){
+			best_fitness = fitness [i]
 			best_fitness_GENs = current_generation[i]
-			best_fitness = fitness[i]
 		}
-		temp_best_fitness = Math.max(temp_best_fitness, fitness[i])
 		//console.log(fitness_wheel_borders[i])
 	}
 	console.log("best GENCODE: " + best_fitness_GENs)
@@ -96,17 +94,10 @@ const newGeneration =()=>{
 	}
 
 	let cutpoint = Math.floor(Math.random()*7+1)
-	next_generation[b_count-1] = best_fitness_GENs.slice(0, cutpoint) + prev_best_fitness_GENs.slice(cutpoint, 9);
+	next_generation[b_count-1] = best_fitness_GENs
 
-	if(temp_best_fitness < 200){
-		console.log("bad!!!")
-		for(let i=0; i<b_count; i++){
-			let cutpoint = Math.floor(Math.random()*7)
-			next_generation[i] = next_generation[i].slice(0, cutpoint) + Math.floor(Math.random()*4) + next_generation[i].slice(cutpoint+1, 8)
-		}
-	}
 	cutpoint = Math.floor(Math.random()*7+1)
-	next_generation[b_count-1] = best_fitness_GENs.slice(0, cutpoint) + prev_best_fitness_GENs.slice(cutpoint, 9);
+	next_generation[b_count-1] = best_fitness_GENs
 	return(next_generation)
 
 }
@@ -185,7 +176,7 @@ const simulateGeneration =()=>{
 			}
 			
 		}
-	}, 10);
+	}, 0);
 }
 simulateGeneration()
 const loop =()=>{
