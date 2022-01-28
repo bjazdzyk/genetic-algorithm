@@ -1,13 +1,13 @@
 let c = document.getElementById("Canvas");
 let ctx = c.getContext("2d");
 
-let disp_otb = false
+let disp_otb = true
 
 const toggle_otb =()=>{
 	disp_otb = (disp_otb+1)%2
 }
 
-let b_count = 2000
+let b_count = 4000
 let states = 8
 let decisions = 4
 
@@ -185,7 +185,7 @@ const simulateGeneration =()=>{
 			}
 			
 		}
-	}, 15);
+	}, 10);
 }
 simulateGeneration()
 const loop =()=>{
