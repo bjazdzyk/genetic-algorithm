@@ -8,7 +8,7 @@ let decisions = 4
 let current_generation = []
 let next_generation = []
 let cube_position = []
-let fittness = []
+let fitness = []
 
 for(let i=0; i<b_count; i++){
 	current_generation.push("")
@@ -17,6 +17,16 @@ for(let i=0; i<b_count; i++){
 	}
 	current_generation[i] += String(Math.floor(Math.random()*2))
 }
+
+const countFitness =()=>{
+	for(let i=0; i<b_count; i++){
+		deltaX = Math.abs(apple_position.x - cube_position[i].x)
+		deltaY = Math.abs(apple_position.y - cube_position[i].y)
+		distance = Math.sqrt(deltaX*deltaX + deltaY*deltaY)
+		fitness[i] = 0-distance
+	}
+}
+
 
 let apple_position
 let simulated_generations = 0
