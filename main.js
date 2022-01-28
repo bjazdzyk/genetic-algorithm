@@ -1,7 +1,7 @@
 let c = document.getElementById("Canvas");
 let ctx = c.getContext("2d");
 
-let b_count = 50
+let b_count = 5000
 let states = 8
 let decisions = 4
 
@@ -14,7 +14,6 @@ for(let i=0; i<b_count; i++){
 	for(let j=0; j<states; j++){
 		current_generation[i] += String(Math.floor(Math.random()*decisions))
 	}
-	current_generation[i] += String(Math.floor(Math.random()*2))
 }
 
 const countFitness =()=>{
@@ -29,24 +28,36 @@ const countFitness =()=>{
 
 let fitness_wheel_borders = []
 let wheel_size = 0
+let best_fitness_GENs
+let prev_best_fitness_GENs
+let best_fitness = -100000000
+let temp_best_fitness
 const generateFitnessWheel =()=>{
+	temp_best_fitness = -100000000
 	countFitness()
 	for(let i=0; i<b_count; i++){
-		if(fitness[i]>0){
-			fitness_wheel_borders[i] = wheel_size + fitness[i]
-			wheel_size += fitness[i]
+		if(fitness[i]>100){
+			fitness_wheel_borders[i] = wheel_size + fitness[i]*fitness[i]*fitness[i]*fitness[i]
+			wheel_size += fitness[i]*fitness[i]*fitness[i]*fitness[i]
 		}else{
 			fitness_wheel_borders[i] = wheel_size
 		}
+		if(fitness[i] >= best_fitness-10){
+			prev_best_fitness_GENs = best_fitness_GENs
+			best_fitness_GENs = current_generation[i]
+			best_fitness = fitness[i]
+		}
+		temp_best_fitness = Math.max(temp_best_fitness, fitness[i])
 		//console.log(fitness_wheel_borders[i])
 	}
+	console.log(best_fitness_GENs)
 	//console.log("size: " + wheel_size)
 }
 
 const newGeneration =()=>{
 	generateFitnessWheel()
 	let next_generation = []
-	for(let i=0; i<b_count; i++){
+	for(let i=0; i<b_count-1; i++){
 		let pre1on_wheel = Math.floor(Math.random()*wheel_size)
 		let pre2on_wheel = Math.floor(Math.random()*wheel_size)
 		//console.log(wheel_size)
@@ -68,30 +79,43 @@ const newGeneration =()=>{
 		let pre2GENs = current_generation[pre2id]
 		let cutpoint = Math.floor(Math.random()*7+1)
 		let newbotGENs = pre1GENs.slice(0, cutpoint) + pre2GENs.slice(cutpoint, 9);
+		
+		let r = Math.random()
+		if(r < 0.01){
+			let cutpoint = Math.floor(Math.random()*7)
+			newbotGENs = newbotGENs.slice(0, cutpoint) + Math.floor(Math.random()*4) + newbotGENs.slice(cutpoint+1, 8)
+		}
 
 		next_generation[i] = newbotGENs
 	}
+
+	let cutpoint = Math.floor(Math.random()*7+1)
+	next_generation[b_count-1] = best_fitness_GENs.slice(0, cutpoint) + prev_best_fitness_GENs.slice(cutpoint, 9);
+
+	if(temp_best_fitness < 200){
+		console.log("bad!!!")
+		for(let i=0; i<b_count; i++){
+			let cutpoint = Math.floor(Math.random()*7)
+			next_generation[i] = next_generation[i].slice(0, cutpoint) + Math.floor(Math.random()*4) + next_generation[i].slice(cutpoint+1, 8)
+		}
+	}
+	cutpoint = Math.floor(Math.random()*7+1)
+	next_generation[b_count-1] = best_fitness_GENs.slice(0, cutpoint) + prev_best_fitness_GENs.slice(cutpoint, 9);
 	return(next_generation)
 
 }
 
-let teaching_kit = [{x:100, y:100}, {x:300, y:300}, {x:100, y:300}, {x:300, y:100}]
 let apple_position
 let simulated_generations = 0
 let generation_count = 10000
 const simulateGeneration =()=>{
 	simulated_generations++
-	// if(simulated_generations <= 8){
-	// 	apple_position = teaching_kit[simulated_generations-1]
-	// }else{
-	// 	apple_position = {x:Math.floor(Math.random()*400), y:Math.floor(Math.random()*400)}
-	// }
 
-	apple_position = {x:Math.floor(Math.random()*400), y:Math.floor(Math.random()*400)}
+	apple_position = {x:Math.floor(Math.random()*500)+250, y:Math.floor(Math.random()*500)}
 
 	cube_position = []
 	for(let i=0; i<b_count; i++){
-		cube_position.push({x:200+Math.floor(Math.random()*20-10), y:200+Math.floor(Math.random()*20-10)})
+		cube_position.push({x:500+Math.floor(Math.random()*20-10), y:250+Math.floor(Math.random()*20-10)})
 	}
 	let steps = 0
 	let steps_limit = 100
@@ -107,7 +131,6 @@ const simulateGeneration =()=>{
 		steps+=1
 		for(let i=0; i<b_count; i++){
 			let decision_point
-			let random_decider = current_generation[i][decisions]
 			let deltaX = apple_position.x - cube_position[i].x
 			let deltaY = apple_position.y - cube_position[i].y
 			if(Math.abs(deltaX) > Math.abs(deltaY)){
@@ -116,24 +139,12 @@ const simulateGeneration =()=>{
 						decision_point = 1
 					}else if(deltaY > 0){
 						decision_point = 0
-					}else{
-						if(random_decider == 0){
-							decision_point = 1
-						}else{
-							decision_point = 0
-						}
 					}
 				}else{
 					if(deltaY < 0){
 						decision_point = 4
 					}else if(deltaY > 0){
 						decision_point = 5
-					}else{
-						if(random_decider == 0){
-							decision_point = 4
-						}else{
-							decision_point = 5
-						}
 					}
 				}
 			}else{
@@ -142,24 +153,12 @@ const simulateGeneration =()=>{
 						decision_point = 2
 					}else if(deltaX > 0){
 						decision_point = 3
-					}else{
-						if(random_decider == 0){
-							decision_point = 2
-						}else{
-							decision_point = 3
-						}
 					}
 				}else{
 					if(deltaX < 0){
 						decision_point = 7
 					}else if(deltaX > 0){
 						decision_point = 6
-					}else{
-						if(random_decider == 0){
-							decision_point = 7
-						}else{
-							decision_point = 6
-						}
 					}
 				}
 			}
@@ -177,22 +176,23 @@ const simulateGeneration =()=>{
 			}
 			
 		}
-	}, 10);
+	}, 20);
 }
 simulateGeneration()
 const loop =()=>{
 	requestAnimationFrame(loop)
 	ctx.fillStyle = "skyblue"
-	ctx.fillRect(0, 0, 400, 400)
-
-	ctx.fillStyle = "red"
-	ctx.fillRect(apple_position.x-5, apple_position.y-5, 10, 10)
+	ctx.fillRect(0, 0, 1000, 500)
 
 	for(let i=0; i<b_count; i++){
 		ctx.fillStyle = "green"
 		ctx.fillRect(cube_position[i].x-5, cube_position[i].y-5, 10, 10)
 	}
-	//ctx.fillStyle = "green"
-	//ctx.fillRect(cube_position[0].x-5, cube_position[0].y-5, 10, 10)
+
+	ctx.fillStyle = "red"
+	ctx.fillRect(apple_position.x-5, apple_position.y-5, 10, 10)
+
+	ctx.fillStyle = "yellow"
+	ctx.fillRect(cube_position[b_count-1].x-5, cube_position[b_count-1].y-5, 10, 10)
 }
 loop()
