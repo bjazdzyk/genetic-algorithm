@@ -1,12 +1,11 @@
 let c = document.getElementById("Canvas");
 let ctx = c.getContext("2d");
 
-let b_count = 100
+let b_count = 50
 let states = 8
 let decisions = 4
 
 let current_generation = []
-let next_generation = []
 let cube_position = []
 let fitness = []
 
@@ -23,28 +22,85 @@ const countFitness =()=>{
 		deltaX = Math.abs(apple_position.x - cube_position[i].x)
 		deltaY = Math.abs(apple_position.y - cube_position[i].y)
 		distance = Math.sqrt(deltaX*deltaX + deltaY*deltaY)
-		fitness[i] = 0-distance
+		fitness[i] = Math.floor(250-distance)
+		//console.log("bot " + i + " fitness:" + fitness[i])
 	}
 }
 
+let fitness_wheel_borders = []
+let wheel_size = 0
+const generateFitnessWheel =()=>{
+	countFitness()
+	for(let i=0; i<b_count; i++){
+		if(fitness[i]>0){
+			fitness_wheel_borders[i] = wheel_size + fitness[i]
+			wheel_size += fitness[i]
+		}else{
+			fitness_wheel_borders[i] = wheel_size
+		}
+		//console.log(fitness_wheel_borders[i])
+	}
+	//console.log("size: " + wheel_size)
+}
 
+const newGeneration =()=>{
+	generateFitnessWheel()
+	let next_generation = []
+	for(let i=0; i<b_count; i++){
+		let pre1on_wheel = Math.floor(Math.random()*wheel_size)
+		let pre2on_wheel = Math.floor(Math.random()*wheel_size)
+		//console.log(wheel_size)
+		let pre1id
+		let pre2id
+		for(let j=0; j<b_count; j++){
+			if(fitness_wheel_borders[j]>pre1on_wheel){
+				pre1id = j
+				break
+			}
+		}
+		for(let j=0; j<b_count; j++){
+			if(fitness_wheel_borders[j]>pre2on_wheel){
+				pre2id = j
+				break
+			}
+		}
+		let pre1GENs = current_generation[pre1id]
+		let pre2GENs = current_generation[pre2id]
+		let cutpoint = Math.floor(Math.random()*7+1)
+		let newbotGENs = pre1GENs.slice(0, cutpoint) + pre2GENs.slice(cutpoint, 9);
+
+		next_generation[i] = newbotGENs
+	}
+	return(next_generation)
+
+}
+
+let teaching_kit = [{x:100, y:100}, {x:300, y:300}, {x:100, y:300}, {x:300, y:100}]
 let apple_position
 let simulated_generations = 0
-let generation_count = 10
+let generation_count = 10000
 const simulateGeneration =()=>{
 	simulated_generations++
+	// if(simulated_generations <= 8){
+	// 	apple_position = teaching_kit[simulated_generations-1]
+	// }else{
+	// 	apple_position = {x:Math.floor(Math.random()*400), y:Math.floor(Math.random()*400)}
+	// }
+
 	apple_position = {x:Math.floor(Math.random()*400), y:Math.floor(Math.random()*400)}
+
 	cube_position = []
 	for(let i=0; i<b_count; i++){
-		cube_position.push({x:200, y:200})
+		cube_position.push({x:200+Math.floor(Math.random()*20-10), y:200+Math.floor(Math.random()*20-10)})
 	}
 	let steps = 0
-	let steps_limit = 20
+	let steps_limit = 100
 
 	let interval = setInterval(()=>{
 		if(steps>=steps_limit){
 			clearInterval(interval)
 			if(simulated_generations < generation_count){
+				current_generation = newGeneration()
 				requestAnimationFrame(simulateGeneration)
 			}
 		}
@@ -121,7 +177,7 @@ const simulateGeneration =()=>{
 			}
 			
 		}
-	}, 100);
+	}, 10);
 }
 simulateGeneration()
 const loop =()=>{
@@ -136,5 +192,7 @@ const loop =()=>{
 		ctx.fillStyle = "green"
 		ctx.fillRect(cube_position[i].x-5, cube_position[i].y-5, 10, 10)
 	}
+	//ctx.fillStyle = "green"
+	//ctx.fillRect(cube_position[0].x-5, cube_position[0].y-5, 10, 10)
 }
 loop()
